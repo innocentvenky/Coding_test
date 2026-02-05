@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VJISS Online Exam</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+        }
+
+        /* HEADER */
+        .header {
+            height: 70px;
+            background: #1e3c72;
+            color: white;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .timer {
+            background: #dc2626;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* CONTENT */
+        .content {
+            margin-top: 70px; /* space for fixed header */
+            padding: 30px;
+            height: calc(100vh - 70px);
+            overflow-y: auto; /* ✅ SCROLL ENABLED */
+        }
+
+        .question {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .question p {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .options label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 40px;
+            background: #1e3c72;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .submit-btn:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <h3>VJISS – Online Test</h3>
+    <div class="timer">
+        Time Left: <span id="timer"></span>
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+    <h2>Welcome {{ student.student_name }}</h2>
+
+    <form id="testForm" method="POST" action="{% url 'submit' %}">
+        {% csrf_token %}
+        <input type="hidden" name="auto_submit" id="autoSubmit" value="false">
+
+        {% for q in questions %}
+        <div class="question">
+            <p>{{ forloop.counter }}. {{ q.question_text }}</p>
+            <div class="options">
+                {% for opt in q.shuffled_choices %}
+                <label>
+                    <input type="radio" name="q{{ q.id }}" value="{{ opt }}">
+                    {{ opt }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+
+    </form>
+</div>
+
+<script>
+/* FULL SCREEN */
+function enterFullScreen() {
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen();
+}
+window.onload = () => enterFullScreen();
+
+/* TIMER */
+let timeLeft = {{ remaining_time|default:0 }};
+let submitted = false;
+
+function formatTime(t) {
+    const m = Math.floor(t / 60);
+    const s = t % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+const timerEl = document.getElementById("timer");
+timerEl.innerText = formatTime(timeLeft);
+
+const interval = setInterval(() => {
+    if (timeLeft <= 0 && !submitted) {
+        submitted = true;
+        clearInterval(interval);
+        alert("Time up! Exam auto-submitted.");
+        document.getElementById("autoSubmit").value = "true";
+        document.getElementById("submitBtn").disabled = true;
+        document.getElementById("testForm").submit();
+        return;
+    }
+
+    timeLeft--;
+    timerEl.innerText = formatTime(timeLeft);
+}, 1000);
+
+/* TAB SWITCH */
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && !submitted) {
+        submitted = true;
+        alert("Tab switching detected. Exam submitted.");
+        document.getElementById("autoSubmit").value = "true";
+        document.getElementById("testForm").submit();
+    }
+});
+
+/* FULL SCREEN EXIT */
+document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement && !submitted) {
+        submitted = true;
+        alert("Full screen exited. Exam submitted.");
+        document.getElementById("autoSubmit").value = "true";
+        document.getElementById("testForm").submit();
+    }
+});
+
+/* BLOCK KEYS */
+document.addEventListener("keydown", function (e) {
+    if (
+        e.key === "Escape" ||
+        e.key === "F11" ||
+        (e.ctrlKey && ["t", "w", "n", "r"].includes(e.key))
+    ) {
+        e.preventDefault();
+    }
+});
+
+/* BLOCK BACK BUTTON */
+history.pushState(null, null, location.href);
+window.onpopstate = () => history.go(1);
+</script>
+
+</body>
+</html>

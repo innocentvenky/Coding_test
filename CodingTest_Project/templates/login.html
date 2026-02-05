@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <me<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VJISS | Connecting Talent Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: #fff;
+            width: 360px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .company-title {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .company-title h2 {
+            margin: 0;
+            color: #1e3c72;
+            font-weight: 700;
+        }
+
+        .company-title p {
+            margin: 5px 0 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            margin-bottom: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #2a5298;
+        }
+
+        .password-box {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 13px;
+            color: #4f46e5;
+            user-select: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #1e3c72;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2a5298;
+        }
+
+        .messages {
+            margin-bottom: 15px;
+        }
+
+        .messages p {
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #e6fffa;
+            color: #065f46;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="company-title">
+        <h2>VJISS</h2>
+        <p>Connecting Talent – Online Test Portal</p>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <p class="{{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Student Login ID</label>
+        <input type="text" name="loginId" placeholder="Enter your Student ID" required>
+
+        <label>Password</label>
+        <div class="password-box">
+            <input type="password" id="passwordField" name="password" placeholder="Enter password" required>
+            <span class="toggle-password" onclick="togglePassword()">Show</span>
+        </div>
+
+        <button type="submit">Start Test</button>
+    </form>
+
+    <div class="footer-text">
+        © 2026 VJISS | All Rights Reserved
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    const input = document.getElementById("passwordField");
+    const text = event.target;
+
+    if (input.type === "password") {
+        input.type = "text";
+        text.innerText = "Hide";
+    } else {
+        input.type = "password";
+        text.innerText = "Show";
+    }
+}
+</script>
+
+</body>
+</html>
