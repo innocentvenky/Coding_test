@@ -20,7 +20,7 @@ class Result(models.Model):
     result=models.CharField(max_length=10,blank=True,null=True)
 
 class Question(models.Model):
-    question_text=models.CharField(max_length=200)
+    question_text=models.TextField(max_length=200)
     choice=models.JSONField()
     correct_answer=models.CharField(max_length=100)
     marks=models.IntegerField(default=0)

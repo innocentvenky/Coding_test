@@ -29,7 +29,7 @@ def loginpage(request):
             Student.objects.filter(student_id=loginId).update(is_active=False)
             request.session["student_id"] = student.student_id
             request.session["start_time"] = int(time.time())
-            request.session.set_expiry(120)  # ⏱️ 30 seconds
+            request.session.set_expiry(3600)  # ⏱️ 3600 seconds
 
             return redirect("/testpage")
 
@@ -46,7 +46,7 @@ def testpage(request):
         return redirect("login")
 
     start_time = request.session.get("start_time")
-    duration = 120  # 1 hour in seconds
+    duration = 3600  # 1 hour in seconds
 
     elapsed = int(time.time()) - start_time
     remaining_time = duration - elapsed
@@ -58,12 +58,14 @@ def testpage(request):
     # 🎯 Select 10 questions ONCE
     if "question_ids" not in request.session:
         ids = list(Question.objects.values_list("id", flat=True))
-        request.session["question_ids"] = random.sample(ids, 10)
-
-    questions = Question.objects.filter(id__in=request.session["question_ids"])
-
+    #     request.session["question_ids"] = random.sample(ids, 10)
+    #     print("Selected Question IDs:", request.session["question_ids"])
+    # questions = Question.objects.filter(id__in=request.session["question_ids"])
+    questions = Question.objects.all()  # TEMPORARY: Use all questions
+    print("Questions for this session:", questions)
     # 🔀 Shuffle choices
     for q in questions:
+        print("Original Choices:", q.choice)
         q.shuffled_choices = q.choice.copy()
         random.shuffle(q.shuffled_choices)
     
