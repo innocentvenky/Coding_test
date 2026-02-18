@@ -106,6 +106,14 @@
             border-radius: 6px;
             cursor: pointer;
         }
+        .code-block {
+    background: #adafb4;
+    padding: 10px;
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    margin: 8px 0;
+}
+
     </style>
 </head>
 <body>
@@ -136,7 +144,21 @@
 
         {% for q in questions %}
         <div class="question">
-            <p>{{ forloop.counter }}. {{ q.question_text }}</p>
+
+                {% if q.code_part %}
+    <p>
+        {{ forloop.counter }}. {{ q.question_part }}:
+    </p>
+
+    <pre class="code-block">
+{{ q.code_part }}
+    </pre>
+{% else %}
+    <p>
+        {{ forloop.counter }}. {{ q.question_part }}
+    </p>
+{% endif %}
+
             <div class="options">
                 {% for opt in q.shuffled_choices %}
                 <label>

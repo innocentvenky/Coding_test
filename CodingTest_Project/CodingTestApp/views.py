@@ -10,6 +10,8 @@ from datetime import datetime
 import time
 import random
 from django.db import transaction
+from django.db.models import Case, When
+
 
 def loginpage(request):
     try:
@@ -39,6 +41,87 @@ def loginpage(request):
 
     return render(request, 'login.html')
 
+# @ensure_csrf_cookie
+# def testpage(request):
+#     student_id = request.session.get("student_id")
+#     if not student_id:
+#         return redirect("login")
+
+#     start_time = request.session.get("start_time")
+#     duration = 3600  # 1 hour in seconds
+
+#     elapsed = int(time.time()) - start_time
+#     remaining_time = duration - elapsed
+
+    
+
+#     student = Student.objects.get(student_id=student_id)
+
+#     # 🎯 Select 10 questions ONCE
+#     if "question_ids" not in request.session:
+#         ids = list(Question.objects.values_list("id", flat=True))
+#         random_ids = random.sample(ids, 50)
+#         request.session["question_ids"] = random_ids
+#         print("Selected Question IDs:", request.session["question_ids"])
+#     #questions = Question.objects.filter(id__in=request.session["question_ids"])
+#     #   questions = Question.objects.all()  # TEMPORARY: Use all questions
+#     print("Questions for this session:", questions)
+#     # 🔀 Shuffle choices
+#     for q in questions:
+#         print("Original Choices:", q.choice)
+#         q.shuffled_choices = q.choice.copy()
+#         random.shuffle(q.shuffled_choices)
+    
+#     if remaining_time <= 0:
+#         return redirect("submit")
+
+#     return render(request, "test.html", {
+#         "student": student,
+#         "questions": questions,
+#         "remaining_time": remaining_time
+#     })
+
+
+# @ensure_csrf_cookie
+# def testpage(request):
+    student_id = request.session.get("student_id")
+    if not student_id:
+        return redirect("login")
+
+    start_time = request.session.get("start_time")
+    duration = 3600
+
+    elapsed = int(time.time()) - start_time
+    remaining_time = duration - elapsed
+
+    if remaining_time <= 0:
+        return redirect("submit")
+
+    student = Student.objects.get(student_id=student_id)
+
+    # 🎯 Generate 50 random questions ONCE
+    if "question_ids" not in request.session:
+        ids = list(Question.objects.values_list("id", flat=True))
+        request.session["question_ids"] = random.sample(ids, 50)
+
+    question_ids = request.session["question_ids"]
+
+    # 🔥 PRESERVE RANDOM QUESTION ORDER
+    questions = Question.objects.filter(id__in=question_ids).order_by(
+        Case(*[When(id=qid, then=pos) for pos, qid in enumerate(question_ids)])
+    )
+
+    # 🔀 Shuffle choices (this part was already correct)
+    for q in questions:
+        q.shuffled_choices = q.choice.copy()
+        random.shuffle(q.shuffled_choices)
+
+    return render(request, "test.html", {
+        "student": student,
+        "questions": questions,
+        "remaining_time": remaining_time
+    })
+
 @ensure_csrf_cookie
 def testpage(request):
     student_id = request.session.get("student_id")
@@ -46,31 +129,40 @@ def testpage(request):
         return redirect("login")
 
     start_time = request.session.get("start_time")
-    duration = 3600  # 1 hour in seconds
+    duration = 3600
 
     elapsed = int(time.time()) - start_time
     remaining_time = duration - elapsed
 
-    
+    if remaining_time <= 0:
+        return redirect("submit")
 
     student = Student.objects.get(student_id=student_id)
 
-    # 🎯 Select 10 questions ONCE
+    # 🎯 Generate 50 random questions ONCE
     if "question_ids" not in request.session:
         ids = list(Question.objects.values_list("id", flat=True))
-    #     request.session["question_ids"] = random.sample(ids, 10)
-    #     print("Selected Question IDs:", request.session["question_ids"])
-    # questions = Question.objects.filter(id__in=request.session["question_ids"])
-    questions = Question.objects.all()  # TEMPORARY: Use all questions
-    print("Questions for this session:", questions)
-    # 🔀 Shuffle choices
+        request.session["question_ids"] = random.sample(ids, 200)
+
+    question_ids = request.session["question_ids"]
+
+    # 🔥 Preserve random order
+    questions = Question.objects.filter(id__in=question_ids).order_by(
+        Case(*[When(id=qid, then=pos) for pos, qid in enumerate(question_ids)])
+    )
+
+    # 🔀 Shuffle choices + 🔥 SPLIT QUESTION & CODE HERE
     for q in questions:
-        print("Original Choices:", q.choice)
+        # choices
         q.shuffled_choices = q.choice.copy()
         random.shuffle(q.shuffled_choices)
-    
-    if remaining_time <= 0:
-        return redirect("submit")
+
+        # 🔥 TEXT / CODE SEPARATION USING :
+        if 'of :' in q.question_text:
+            q.question_part, q.code_part = q.question_text.split('of :', 1)
+        else:
+            q.question_part = q.question_text
+            q.code_part = None
 
     return render(request, "test.html", {
         "student": student,
@@ -90,7 +182,10 @@ def submit_test(request):
             return redirect("/login")
 
         student = Student.objects.get(student_id=student_id)
-        questions = Question.objects.all()
+        #questions = Question.objects.all()
+        question_ids = request.session.get("question_ids", [])
+        questions = Question.objects.filter(id__in=question_ids)
+
 
         total_marks = 0
         marks_obtained = 0

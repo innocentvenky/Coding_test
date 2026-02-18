@@ -127,7 +127,8 @@
 <div class="login-container">
     <div class="company-title">
         <h2>VJISS</h2>
-        <p>Connecting Talent – Online Test Portal</p>
+        <h3>PYTHON TEST</h3>
+        <p>Connecting Talent – Online Test Portal </p>
     </div>
 
     {% if messages %}
@@ -138,15 +139,15 @@
     </div>
     {% endif %}
 
-    <form method="POST">
+    <form method="POST" >
         {% csrf_token %}
 
         <label>Student Login ID</label>
-        <input type="text" name="loginId" placeholder="Enter your Student ID" required>
+        <input type="text" name="loginId" autocomplete="off" placeholder="Enter your Student ID" required>
 
         <label>Password</label>
         <div class="password-box">
-            <input type="password" id="passwordField" name="password" placeholder="Enter password" required>
+            <input type="password" id="passwordField" name="password"  autocomplete="new-password" placeholder="Enter password" required>
             <span class="toggle-password" onclick="togglePassword()">Show</span>
         </div>
 
