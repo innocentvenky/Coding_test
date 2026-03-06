@@ -1,120 +1,13 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>VJISS Online Exam</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/test.css' %}">
+    <script src="{% static 'javascripts/test.js' %}"></script>
 
-    <style>
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f3f4f6;
-        }
-
-        /* HEADER */
-        .header {
-            height: 70px;
-            background: #1e3c72;
-            color: white;
-            padding: 0 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-
-        .timer {
-            background: #dc2626;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        /* STATUS BOX */
-        .status-box {
-            position: fixed;
-            top: 85px;
-            right: 20px;
-            width: 220px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            padding: 15px;
-            z-index: 999;
-            font-size: 14px;
-        }
-
-        .status-box h4 {
-            margin: 0 0 10px;
-            text-align: center;
-            color: #1e3c72;
-        }
-
-        .status-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 6px 0;
-            font-weight: bold;
-        }
-
-        .status-item span {
-            color: #dc2626;
-        }
-
-        /* CONTENT */
-        .content {
-            margin-top: 70px;
-            padding: 30px;
-            height: calc(100vh - 70px);
-            overflow-y: auto;
-        }
-
-        .question {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .question p {
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .options label {
-            display: block;
-            margin: 8px 0;
-            cursor: pointer;
-        }
-
-        .submit-btn {
-            display: block;
-            margin: 30px auto;
-            padding: 12px 40px;
-            background: #1e3c72;
-            color: white;
-            font-size: 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .code-block {
-    background: #adafb4;
-    padding: 10px;
-    border-radius: 6px;
-    font-family: Consolas, monospace;
-    margin: 8px 0;
-}
-
-    </style>
 </head>
 <body>
 
@@ -122,7 +15,7 @@
 <div class="header">
     <h3>VJISS – Online Test</h3>
     <div class="timer">
-        Time Left: <span id="timer"></span>
+        Time Left: <span id="timer" data-time="{{ remaining_time }}"></span>
     </div>
 </div>
 
@@ -172,99 +65,7 @@
     </form>
 </div>
 
-<script>
-/* FULL SCREEN */
-function enterFullScreen() {
-    const el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen();
-}
-window.onload = () => {
-    enterFullScreen();
-    updateQuestionStatus();
-};
 
-/* TIMER */
-let timeLeft = {{ remaining_time|default:0 }}; // Time in seconds   
-let submitted = false;
-
-function formatTime(t) {
-    const m = Math.floor(t / 60);
-    const s = t % 60;
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-}
-
-const timerEl = document.getElementById("timer");
-timerEl.innerText = formatTime(timeLeft);
-
-setInterval(() => {
-    if (timeLeft <= 0 && !submitted) {
-        submitted = true;
-        alert("Time up! Exam auto-submitted.");
-        document.getElementById("autoSubmit").value = "true";
-        document.getElementById("testForm").submit();
-    }
-    timeLeft--;
-    timerEl.innerText = formatTime(timeLeft);
-}, 1000);
-
-/* QUESTION STATUS LOGIC */
-const totalQuestions = document.querySelectorAll(".question").length;
-const totalEl = document.getElementById("totalQ");
-const answeredEl = document.getElementById("answeredQ");
-const remainingEl = document.getElementById("remainingQ");
-
-totalEl.innerText = totalQuestions;
-
-function updateQuestionStatus() {
-    let answered = 0;
-    document.querySelectorAll(".question").forEach(q => {
-        if (q.querySelector("input[type='radio']:checked")) {
-            answered++;
-        }
-    });
-    answeredEl.innerText = answered;
-    remainingEl.innerText = totalQuestions - answered;
-}
-
-document.querySelectorAll("input[type='radio']").forEach(radio => {
-    radio.addEventListener("change", updateQuestionStatus);
-});
-
-/* TAB SWITCH */
-document.addEventListener("visibilitychange", () => {
-    if (document.hidden && !submitted) {
-        submitted = true;
-        alert("Tab switch detected. Exam submitted.");
-        document.getElementById("autoSubmit").value = "true";
-        document.getElementById("testForm").submit();
-    }
-});
-
-/* FULL SCREEN EXIT */
-document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement && !submitted) {
-        submitted = true;
-        alert("Full screen exited. Exam submitted.");
-        document.getElementById("autoSubmit").value = "true";
-        document.getElementById("testForm").submit();
-    }
-});
-
-/* BLOCK KEYS */
-document.addEventListener("keydown", function (e) {
-    if (
-        e.key === "Escape" ||
-        e.key === "F11" ||
-        (e.ctrlKey && ["t", "w", "n", "r"].includes(e.key))
-    ) {
-        e.preventDefault();
-    }
-});
-
-/* BLOCK BACK BUTTON */
-history.pushState(null, null, location.href);
-window.onpopstate = () => history.go(1);
-</script>
 
 </body>
 </html>

@@ -1,0 +1,112 @@
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: #fff;
+            width: 360px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .company-title {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .company-title h2 {
+            margin: 0;
+            color: #1e3c72;
+            font-weight: 700;
+        }
+
+        .company-title p {
+            margin: 5px 0 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            margin-bottom: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #2a5298;
+        }
+
+        .password-box {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 13px;
+            color: #4f46e5;
+            user-select: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #1e3c72;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2a5298;
+        }
+
+        .messages {
+            margin-bottom: 15px;
+        }
+
+        .messages p {
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #e6fffa;
+            color: #065f46;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }

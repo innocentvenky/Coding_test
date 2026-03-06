@@ -84,44 +84,6 @@ def loginpage(request):
 
 # @ensure_csrf_cookie
 # def testpage(request):
-    student_id = request.session.get("student_id")
-    if not student_id:
-        return redirect("login")
-
-    start_time = request.session.get("start_time")
-    duration = 3600
-
-    elapsed = int(time.time()) - start_time
-    remaining_time = duration - elapsed
-
-    if remaining_time <= 0:
-        return redirect("submit")
-
-    student = Student.objects.get(student_id=student_id)
-
-    # 🎯 Generate 50 random questions ONCE
-    if "question_ids" not in request.session:
-        ids = list(Question.objects.values_list("id", flat=True))
-        request.session["question_ids"] = random.sample(ids, 50)
-
-    question_ids = request.session["question_ids"]
-
-    # 🔥 PRESERVE RANDOM QUESTION ORDER
-    questions = Question.objects.filter(id__in=question_ids).order_by(
-        Case(*[When(id=qid, then=pos) for pos, qid in enumerate(question_ids)])
-    )
-
-    # 🔀 Shuffle choices (this part was already correct)
-    for q in questions:
-        q.shuffled_choices = q.choice.copy()
-        random.shuffle(q.shuffled_choices)
-
-    return render(request, "test.html", {
-        "student": student,
-        "questions": questions,
-        "remaining_time": remaining_time
-    })
-
 @ensure_csrf_cookie
 def testpage(request):
     student_id = request.session.get("student_id")
@@ -142,7 +104,7 @@ def testpage(request):
     # 🎯 Generate 50 random questions ONCE
     if "question_ids" not in request.session:
         ids = list(Question.objects.values_list("id", flat=True))
-        request.session["question_ids"] = random.sample(ids, 200)
+        request.session["question_ids"] = random.sample(ids, 50)
 
     question_ids = request.session["question_ids"]
 
@@ -171,51 +133,60 @@ def testpage(request):
     })
 
 
-
 @transaction.atomic
 @csrf_exempt
 def submit_test(request):
+
     if request.method == "POST":
+
         student_id = request.session.get("student_id")
         if not student_id:
-            messages.error(request, "Session expired. Please login again.")
-            return redirect("/login")
+            return redirect("login")
 
         student = Student.objects.get(student_id=student_id)
-        #questions = Question.objects.all()
+
         question_ids = request.session.get("question_ids", [])
         questions = Question.objects.filter(id__in=question_ids)
-
+        print("Submitted Question IDs:", question_ids)
 
         total_marks = 0
         marks_obtained = 0
 
         for question in questions:
+
             total_marks += question.marks
+
             selected_answer = request.POST.get(f"q{question.id}")
-            print(f"Question ID: {question.id}, Selected Answer: {selected_answer}, Correct Answer: {question.correct_answer}")
+
             if selected_answer == question.correct_answer:
-                print("Correct answer!")
                 marks_obtained += question.marks
+            else:
+                print(f"Wrong Answer for Q{question.id}: Selected {selected_answer}, Correct {question.correct_answer}")
 
         result_status = "Pass" if marks_obtained >= (0.75 * total_marks) else "Fail"
-        print("Marks Obtained:", marks_obtained)
-        print("Total Marks:", total_marks)
-        print("Result Status:", result_status)
+
+
         Result.objects.create(
             student=student,
             marks_obtained=marks_obtained,
             total_marks=total_marks,
             result=result_status
         )
-        print("Result saved successfully.")
-        # Clear session
-        request.session.flush()
-        return redirect("login")
-
-    return redirect("/testpage")
 
 
+        # clear exam session only
+        request.session.pop("question_ids", None)
+        request.session.pop("start_time", None)
+
+
+        return render(request,"login.html",{
+            "student":student,
+            "marks":marks_obtained,
+            "total":total_marks,
+            "result":result_status
+        })
+
+    return redirect("testpage")
 
 
 

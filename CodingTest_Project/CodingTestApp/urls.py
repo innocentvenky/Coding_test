@@ -7,11 +7,11 @@ from . views import submit_test
 #ending points
 
 urlpatterns=[
-    path('',StudentRegisterData,name='register'),
+    path('stddata/',StudentRegisterData,name='register'),
     path("rigistation/",StudentRegistation,name='registation'),
     path('delete/<str:student_email>/',StudentDelete,name='delete'),
     path('update/<str:student_email>/',Student_Result_Update,name='update'),
-    path("login/",loginpage,name='login'),
+    path("",loginpage,name='login'),
     path("testpage/",testpage,name='testpage'),
     path("submit/", submit_test, name="submit"),
 
