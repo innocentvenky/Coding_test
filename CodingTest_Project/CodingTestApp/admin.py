@@ -5,7 +5,7 @@ from . models import Question
 
 # Register your models here.
 class StudentAdmin(admin.ModelAdmin):
-    list_display=["student_name","student_email","student_id","student_password","student_dob","exam_date"]
+    list_display=["student_name","student_email","student_id","student_password","student_dob","exam_date",]
 admin.site.register(Student,StudentAdmin)
 
 class ResultAdmin(admin.ModelAdmin):
@@ -22,5 +22,5 @@ class ResultAdmin(admin.ModelAdmin):
 admin.site.register(Result,ResultAdmin)
 
 class QuestionAdmin(admin.ModelAdmin):
-    list_display=["question_text","choice","correct_answer","marks"]
+    list_display=["id","question_text","choice","correct_answer","marks",]
 admin.site.register(Question,QuestionAdmin)
