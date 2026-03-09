@@ -1,71 +1,82 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>VJISS Online Exam</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/test.css' %}">
-    <script src="{% static 'javascripts/test.js' %}"></script>
+
+<meta charset="UTF-8">
+<title>VJISS Online Exam</title>
+
+<link rel="stylesheet" href="{% static 'css/test.css' %}">
+<script src="{% static 'javascripts/test.js' %}" defer></script>
 
 </head>
+
 <body>
 
-<!-- HEADER -->
 <div class="header">
-    <h3>VJISS – Online Test</h3>
-    <div class="timer">
-        Time Left: <span id="timer" data-time="{{ remaining_time }}"></span>
-    </div>
+<h3>Python Entry Level Test</h3>
+
+<div class="timer">
+Time Left: <span id="timer" data-time="{{ remaining_time }}"></span>
+</div>
 </div>
 
-<!-- QUESTION STATUS -->
-<div class="status-box">
-    <h4>Question Status</h4>
-    <div class="status-item">Total: <span id="totalQ">0</span></div>
-    <div class="status-item">Answered: <span id="answeredQ">0</span></div>
-    <div class="status-item">Remaining: <span id="remainingQ">0</span></div>
+
+<!-- RIGHT SIDE PALETTE -->
+
+<div class="palette-box">
+
+<h4>Questions</h4>
+
+<div id="questionPalette"></div>
+
 </div>
 
-<!-- CONTENT -->
+
+
+
 <div class="content">
-    <h2>Welcome {{ student.student_name }}</h2>
 
-    <form id="testForm" method="POST" action="{% url 'submit' %}">
-        {% csrf_token %}
-        <input type="hidden" name="auto_submit" id="autoSubmit" value="false">
+<h2>Welcome to VJISS Online Exam, {{ student.student_name }}</h2>
 
-        {% for q in questions %}
-        <div class="question">
+<form id="testForm" method="POST" action="{% url 'submit' %}">
 
-                {% if q.code_part %}
-    <p>
-        {{ forloop.counter }}. {{ q.question_part }}:
-    </p>
+{% csrf_token %}
 
-    <pre class="code-block">
-{{ q.code_part }}
-    </pre>
-{% else %}
-    <p>
-        {{ forloop.counter }}. {{ q.question_part }}
-    </p>
+{% for q in questions %}
+
+<div class="question" id="question{{ forloop.counter }}">
+
+<p>{{ forloop.counter }}. {{ q.question_part }}</p>
+
+{% if q.code_part %}
+<pre class="code-block">{{ q.code_part }}</pre>
 {% endif %}
 
-            <div class="options">
-                {% for opt in q.shuffled_choices %}
-                <label>
-                    <input type="radio" name="q{{ q.id }}" value="{{ opt }}">
-                    {{ opt }}
-                </label>
-                {% endfor %}
-            </div>
-        </div>
-        {% endfor %}
-    </form>
+<div class="options">
+
+{% for opt in q.shuffled_choices %}
+
+<label>
+<input type="radio" name="q{{ q.id }}" value="{{ opt }}">
+{{ opt }}
+</label>
+
+{% endfor %}
+
 </div>
 
+<button type="button" class="review-btn">Mark for Review</button>
 
+</div>
+
+{% endfor %}
+
+<button type="submit" class="submit-btn">Submit Exam</button>
+
+</form>
+
+</div>
 
 </body>
 </html>

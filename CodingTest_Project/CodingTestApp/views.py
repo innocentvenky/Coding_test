@@ -104,7 +104,8 @@ def testpage(request):
     # 🎯 Generate 50 random questions ONCE
     if "question_ids" not in request.session:
         ids = list(Question.objects.values_list("id", flat=True))
-        request.session["question_ids"] = random.sample(ids, 50)
+        random.shuffle(ids)
+        request.session["question_ids"] = ids[:50]
 
     question_ids = request.session["question_ids"]
 
